@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aman Shopping</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f3f6;
+  color: #222;
+}
+
+header {
+  background: #131921;
+  color: white;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.logo {
+  font-size: 23px;
+  font-weight: bold;
+  color: #ffca28;
+}
+
+.search {
+  display: flex;
+  flex: 1;
+  min-width: 180px;
+  max-width: 500px;
+}
+
+.search input {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 5px 0 0 5px;
+}
+
+.search button {
+  border: none;
+  padding: 12px;
+  background: #ffca28;
+  cursor: pointer;
+  border-radius: 0 5px 5px 0;
+}
+
+.cart-button {
+  padding: 10px 14px;
+  background: #ffca28;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.banner {
+  background: linear-gradient(120deg, #243b55, #141e30);
+  color: white;
+  text-align: center;
+  padding: 35px 15px;
+}
+
+.banner h1 {
+  margin-top: 0;
+}
+
+main {
+  max-width: 1200px;
+  margin: auto;
+  padding: 18px;
+}
+
+.section-title {
+  margin: 12px 0 18px;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 15px;
+}
+
+.product {
+  background: white;
+  border-radius: 9px;
+  padding: 14px;
+  text-align: center;
+  box-shadow: 0 2px 7px #00000012;
+}
+
+.product img {
+  width: 100%;
+  height: 135px;
+  object-fit: contain;
+}
+
+.product h3 {
+  font-size: 16px;
+  min-height: 38px;
+}
+
+.price {
+  font-size: 19px;
+  font-weight: bold;
+  color: #137333;
+}
+
+.product button,
+.checkout-button,
+.close-button {
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.add-button {
+  background: #ffca28;
+}
+
+.checkout-button {
+  background: #138808;
+  color: white;
+  font-weight: bold;
+}
+
+.close-button {
+  background: #ddd;
+}
+
+.panel {
+  display: none;
+  background: white;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 9px;
+}
+
+.panel input,
+.panel textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font: inherit;
+}
+
+.payment-note {
+  background: #e9f7e9;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 12px 0;
+}
+
+footer {
+  background: #131921;
+  color: white;
+  padding: 25px;
+  text-align: center;
+  margin-top: 30px;
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 12px;
+  }
+
+  .products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  main {
+    padding: 10px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">🛍️ Aman Shopping</div>
+
+  <div class="search">
+    <input id="searchInput"
+      type="search"
+      placeholder="प्रोडक्ट खोजें..."
+      oninput="renderProducts()">
+    <button onclick="renderProducts()">खोजें</button>
+  </div>
+
+  <button class="cart-button" onclick="showCart()">
+    🛒 Cart (<span id="cartCount">0</span>)
+  </button>
+</header>
+
+<section class="banner">
+  <h1>Welcome to Aman Shopping</h1>
+  <p>आपकी पसंद, आपकी खरीदारी!</p>
+  <p>💵 केवल Cash on Delivery</p>
+</section>
+
+<main>
+  <h2 class="section-title">हमारे प्रोडक्ट</h2>
+  <div class="products" id="products"></div>
+
+  <section class="panel" id="cartPanel">
+    <h2>आपका कार्ट</h2>
+    <div id="cartItems"></div>
+    <h3 id="cartTotal">कुल: ₹0</h3>
+    <button class="checkout-button" onclick="showCheckout()">
+      Cash on Delivery से ऑर्डर करें
+    </button>
+    <button class="close-button" onclick="hidePanels()">बंद करें</button>
+  </section>
+
+  <section class="panel" id="checkoutPanel">
+    <h2>डिलीवरी की जानकारी</h2>
+
+    <form id="orderForm">
+      <label>पूरा नाम</label>
+      <input name="name" required maxlength="100"
+        placeholder="अपना नाम लिखें">
+
+      <label>मोबाइल नंबर</label>
+      <input name="phone" type="tel" required
+        pattern="[6-9][0-9]{9}" maxlength="10"
+        placeholder="10 अंकों का मोबाइल नंबर">
+
+      <label>पूरा डिलीवरी पता</label>
+      <textarea name="address" required maxlength="500"
+        placeholder="मकान नंबर, गाँव/शहर, जिला, राज्य और PIN कोड"></textarea>
+
+      <div class="payment-note">
+        <strong>भुगतान का तरीका: Cash on Delivery</strong>
+        <p>सामान मिलने पर डिलीवरी के समय भुगतान करें।</p>
+        <p>कोई ऑनलाइन पेमेंट विकल्प उपलब्ध नहीं है।</p>
+      </div>
+
+      <button class="checkout-button" type="submit">
+        ऑर्डर की जानकारी सेव करें
+      </button>
+    </form>
+
+    <div id="orderResult"></div>
+    <button class="close-button" onclick="hidePanels()">बंद करें</button>
+  </section>
+</main>
+
+<footer>
+  <h3>Aman Shopping</h3>
+  <p>केवल Cash on Delivery</p>
+  <p>© 2026 Aman Shopping</p>
+</footer>
+
+<script>
+const productsData = [
+  {
+    id: 1,
+    name: "Wireless Headphones",
+    price: 799,
+    image: "https://placehold.co/300x200?text=Headphones"
+  },
+  {
+    id: 2,
+    name: "Smart Watch",
+    price: 1199,
+    image: "https://placehold.co/300x200?text=Smart+Watch"
+  },
+  {
+    id: 3,
+    name: "Running Shoes",
+    price: 999,
+    image: "https://placehold.co/300x200?text=Shoes"
+  },
+  {
+    id: 4,
+    name: "Backpack",
+    price: 699,
+    image: "https://placehold.co/300x200?text=Backpack"
+  },
+  {
+    id: 5,
+    name: "Bluetooth Speaker",
+    price: 899,
+    image: "https://placehold.co/300x200?text=Speaker"
+  },
+  {
+    id: 6,
+    name: "Mobile Phone",
+    price: 9999,
+    image: "https://placehold.co/300x200?text=Mobile"
+  }
+];
+
+let cart = [];
+
+function renderProducts() {
+  const search = document.getElementById("searchInput")
+    .value.toLowerCase();
+
+  const filtered = productsData.filter(product =>
+    product.name.toLowerCase().includes(search)
+  );
+
+  document.getElementById("products").innerHTML =
+    filtered.map(product => `
+      <article class="product">
+        <img src="${product.image}"
+          alt="${product.name}" loading="lazy">
+        <h3>${product.name}</h3>
+        <p class="price">₹${product.price.toLocaleString("en-IN")}</p>
+        <button class="add-button"
+          onclick="addToCart(${product.id})">
+          कार्ट में जोड़ें
+        </button>
+      </article>
+    `).join("") || "<p>कोई प्रोडक्ट नहीं मिला।</p>";
+}
+
+function addToCart(id) {
+  const existing = cart.find(item => item.id === id);
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({
+      ...productsData.find(product => product.id === id),
+      quantity: 1
+    });
+  }
+
+  updateCart();
+  alert("प्रोडक्ट कार्ट में जोड़ दिया गया!");
+}
+
+function updateCart() {
+  document.getElementById("cartCount").textContent =
+    cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  document.getElementById("cartItems").innerHTML =
+    cart.map(item => `
+      <div>
+        <p>${item.name} × ${item.quantity}
+        — ₹${(item.price * item.quantity).toLocaleString("en-IN")}</p>
+        <button onclick="changeQuantity(${item.id}, -1)">−</button>
+        <button onclick="changeQuantity(${item.id}, 1)">+</button>
+        <button onclick="removeItem(${item.id})">हटाएँ</button>
+      </div>
+    `).join("") || "<p>आपका कार्ट खाली है।</p>";
+
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity, 0
+  );
+
+  document.getElementById("cartTotal").textContent =
+    "कुल: ₹" + total.toLocaleString("en-IN");
+}
+
+function changeQuantity(id, change) {
+  const item = cart.find(item => item.id === id);
+  if (!item) return;
+
+  item.quantity += change;
+
+  if (item.quantity <= 0) {
+    cart = cart.filter(item => item.id !== id);
+  }
+
+  updateCart();
+}
+
+function removeItem(id) {
+  cart = cart.filter(item => item.id !== id);
+  updateCart();
+}
+
+function hidePanels() {
+  document.getElementById("cartPanel").style.display = "none";
+  document.getElementById("checkoutPanel").style.display = "none";
+}
+
+function showCart() {
+  hidePanels();
+  document.getElementById("cartPanel").style.display = "block";
+  document.getElementById("cartPanel").scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+function showCheckout() {
+  if (cart.length === 0) {
+    alert("पहले कार्ट में प्रोडक्ट जोड़ें।");
+    return;
+  }
+
+  document.getElementById("checkoutPanel").style.display = "block";
+  document.getElementById("checkoutPanel").scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+document.getElementById("orderForm").addEventListener(
+  "submit", function(event) {
+    event.preventDefault();
+
+    if (cart.length === 0) {
+      alert("आपका कार्ट खाली है।");
+      return;
+    }
+
+    const formData = new FormData(this);
+    const order = {
+      customer: {
+        name: formData.get("name"),
+        phone: formData.get("phone"),
+        address: formData.get("address")
+      },
+      items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity
+      })),
+      total: cart.reduce(
+        (sum, item) => sum + item.price * item.quantity, 0
+      ),
+      paymentMethod: "Cash on Delivery",
+      status: "Order request - not yet confirmed",
+      createdAt: new Date().toISOString()
+    };
+
+    document.getElementById("orderResult").innerHTML = `
+      <div class="payment-note">
+        <h3>ऑर्डर की जानकारी तैयार है</h3>
+        <p>कुल राशि: ₹${order.total.toLocaleString("en-IN")}</p>
+        <p>भुगतान: Cash on Delivery</p>
+        <p>ध्यान दें: यह केवल इस ब्राउज़र में तैयार की गई जानकारी है।
+        ऑर्डर दुकानदार तक नहीं पहुँचा है और न ही सर्वर पर सेव हुआ है।</p>
+      </div>
+    `;
+
+    console.log("Order information:", order);
+  }
+);
+
+renderProducts();
+updateCart();
+</script>
+
+</body>
+</html>
